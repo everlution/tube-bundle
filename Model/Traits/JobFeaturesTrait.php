@@ -1,14 +1,12 @@
 <?php
 
-namespace Everlution\TubeBundle\Job;
+namespace Everlution\TubeBundle\Model\Traits;
 
 use JMS\Serializer\Annotation\Expose;
 use JMS\Serializer\Annotation\Type;
 
-abstract class AbstractJob implements JobInterface
+trait JobFeaturesTrait
 {
-    private $id;
-
     /**
      * @Expose
      * @Type("integer")
@@ -27,17 +25,17 @@ abstract class AbstractJob implements JobInterface
      */
     private $ttr;
 
-    public function setId($id)
-    {
-        $this->id = $id;
+    /**
+     * @Expose
+     * @Type("integer")
+     */
+    private $maxRetriesOnFailure;
 
-        return $this;
-    }
-
-    public function getId()
-    {
-        return $this->id;
-    }
+    /**
+     * @Expose
+     * @Type("integer")
+     */
+    private $delayOnRetry;
 
     public function setPriority($priority)
     {
@@ -73,5 +71,29 @@ abstract class AbstractJob implements JobInterface
     public function getTtr()
     {
         return $this->ttr;
+    }
+
+    public function setMaxRetriesOnFailure($maxRetriesOnFailure)
+    {
+        $this->maxRetriesOnFailure = $maxRetriesOnFailure;
+
+        return $this;
+    }
+
+    public function getMaxRetriesOnFailure()
+    {
+        return $this->maxRetriesOnFailure;
+    }
+
+    public function setDelayOnRetry($delayOnRetry)
+    {
+        $this->delayOnRetry = $delayOnRetry;
+
+        return $this;
+    }
+
+    public function getDelayOnRetry()
+    {
+        return $this->delayOnRetry;
     }
 }

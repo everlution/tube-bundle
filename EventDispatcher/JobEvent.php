@@ -2,9 +2,9 @@
 
 namespace Everlution\TubeBundle\EventDispatcher;
 
-use Everlution\TubeBundle\Job\JobInterface;
+use Everlution\TubeBundle\Model\Interfaces\JobInterface;
 
-class TubeEvent extends \Symfony\Component\EventDispatcher\Event
+class JobEvent extends \Symfony\Component\EventDispatcher\Event
 {
     private $job;
 

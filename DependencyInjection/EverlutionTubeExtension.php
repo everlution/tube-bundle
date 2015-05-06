@@ -25,8 +25,6 @@ class EverlutionTubeExtension extends Extension
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
 
-        // instanciating the beanstalkd client
-
         $beanstalkd = $config['beanstalkd'];
 
         $pheanstalkDefinition = $container
@@ -34,6 +32,13 @@ class EverlutionTubeExtension extends Extension
             ->setArguments(array(
                 $beanstalkd['host'],
                 $beanstalkd['port'],
+            ))
+        ;
+
+        $jobFactoryDefinition = $container
+            ->register('everlution_tube.factory.job', 'Everlution\TubeBundle\Factory\JobFactory')
+            ->setArguments(array(
+                $config['job_class'],
             ))
         ;
     }

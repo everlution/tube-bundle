@@ -34,6 +34,10 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->scalarNode('job_class')
+                    ->cannotBeEmpty()
+                    ->defaultValue('Everlution\TubeBundle\Model\Job')
+                ->end()
             ->end()
         ;
 

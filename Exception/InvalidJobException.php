@@ -1,8 +1,8 @@
 <?php
 
-namespace Everlution\TubeBundle\Exception\Job;
+namespace Everlution\TubeBundle\Exception;
 
-class InvalidValuesException extends \Exception
+class InvalidJobException extends \Exception
 {
     public function __construct($payload, $actual, $code, $previous)
     {

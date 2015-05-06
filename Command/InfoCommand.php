@@ -59,7 +59,9 @@ class InfoCommand extends ContainerAwareCommand
         if ($tubeStats['current-jobs-ready']) {
             $output->writeln(sprintf('<info>Next Job Ready</info>'));
             $nextJobReady = $pheanstalk->peekReady($selectedTube);
-            $output->write($nextJobReady->getData());
+            $output->write(sprintf('<comment>%s</comment>', $nextJobReady->getData()));
         }
+
+        $output->writeln('');
     }
 }
