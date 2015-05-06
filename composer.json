@@ -1,0 +1,32 @@
+{
+    "name" : "everlution/tube-bundle",
+    "description" : "A Symfony2 bundle for beanstalkd",
+    "type" : "symfony-bundle",
+    "authors" : [{
+        "name": "Michael Caldera",
+        "email": "michcald@gmail.com",
+        "homepage": "http://michaelcaldera.net",
+        "role": "Developer"
+    }],
+    "keywords" : [
+        "beanstalkd", "pheanstalkd", "queue"
+    ],
+    "license" : [
+        "Apache-2.0"
+    ],
+    "require" : {
+        "php": ">=5.3.3",
+        "pda/pheanstalk": "3.*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.*",
+        "squizlabs/php_codesniffer": "2.*",
+        "fabpot/php-cs-fixer": "2.0.*@dev",
+        "symfony/var-dumper": "2.6.*"
+    },
+    "autoload" : {
+        "psr-0" : {
+            "Everlution\\TubeBundle" : ""
+        }
+    }
+}
