@@ -20,9 +20,22 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('everlution_tube');
 
-        // Here you should define the parameters that are allowed to
-        // configure your bundle. See the documentation linked above for
-        // more information on that topic.
+        $rootNode
+            ->children()
+                ->arrayNode('beanstalkd')
+                    ->children()
+                        ->scalarNode('host')
+                            ->cannotBeEmpty()
+                            ->isRequired()
+                        ->end()
+                        ->scalarNode('port')
+                            ->cannotBeEmpty()
+                            ->isRequired()
+                        ->end()
+                    ->end()
+                ->end()
+            ->end()
+        ;
 
         return $treeBuilder;
     }
