@@ -4,15 +4,15 @@ namespace Everlution\TubeBundle\EventDispatcher;
 
 class DefaultEvent extends \Symfony\Component\EventDispatcher\Event
 {
-    private $data;
+    private $message;
 
-    public function __construct(array $data = array())
+    public function __construct($message)
     {
-        $this->data = $data;
+        $this->message = $message;
     }
 
-    public function getData()
+    public function getMessage()
     {
-        return $this->data;
+        return $this->message;
     }
 }

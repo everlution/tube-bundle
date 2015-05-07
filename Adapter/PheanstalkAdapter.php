@@ -57,8 +57,6 @@ class PheanstalkAdapter extends AbstractAdapter
      */
     public function produce($tubeName, JobInterface $job)
     {
-        $this->checkServiceUp();
-
         $payload = $this
             ->jobSerializer
             ->serialize($job)
@@ -80,8 +78,6 @@ class PheanstalkAdapter extends AbstractAdapter
 
     public function reserve($tubeName, $timeout = null)
     {
-        $this->checkServiceUp();
-
         $pheanstalkJob = $this
             ->getTube($tubeName)
             ->reserveFromTube($tubeName, $timeout)
@@ -118,8 +114,6 @@ class PheanstalkAdapter extends AbstractAdapter
 
     public function release($tubeName, JobInterface $job)
     {
-        $this->checkServiceUp();
-
         $this
             ->getTube($tubeName)
             ->release(
@@ -132,8 +126,6 @@ class PheanstalkAdapter extends AbstractAdapter
 
     public function bury($tubeName, JobInterface $job)
     {
-        $this->checkServiceUp();
-
         $this
             ->getTube($tubeName)
             ->bury(
@@ -144,8 +136,6 @@ class PheanstalkAdapter extends AbstractAdapter
 
     public function delete($tubeName, JobInterface $job)
     {
-        $this->checkServiceUp();
-
         $this
             ->getTube($tubeName)
             ->delete(
@@ -156,12 +146,6 @@ class PheanstalkAdapter extends AbstractAdapter
 
     public function countJobRetries(JobInterface $job)
     {
-        $this->checkServiceUp();
-
-        if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
-            return 0;
-        }
-
         $stats = $this
             ->pheanstalk
             ->statsJob(
@@ -169,13 +153,11 @@ class PheanstalkAdapter extends AbstractAdapter
             )
         ;
 
-        return $stats['releases'];
+        return isset($stats['releases']) ? $stats['releases'] : 0;
     }
 
     public function countJobsBuried($tubeName)
     {
-        $this->checkServiceUp();
-
         if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
             return 0;
         }
@@ -190,8 +172,6 @@ class PheanstalkAdapter extends AbstractAdapter
 
     public function countJobsReady($tubeName)
     {
-        $this->checkServiceUp();
-
         if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
             return 0;
         }
@@ -206,8 +186,6 @@ class PheanstalkAdapter extends AbstractAdapter
 
     public function countJobsDelayed($tubeName)
     {
-        $this->checkServiceUp();
-
         if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
             return 0;
         }
@@ -222,8 +200,6 @@ class PheanstalkAdapter extends AbstractAdapter
 
     public function countJobsReserved($tubeName)
     {
-        $this->checkServiceUp();
-
         if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
             return 0;
         }
@@ -238,8 +214,6 @@ class PheanstalkAdapter extends AbstractAdapter
 
     public function countWaitingJobs($tubeName)
     {
-        $this->checkServiceUp();
-
         if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
             return 0;
         }

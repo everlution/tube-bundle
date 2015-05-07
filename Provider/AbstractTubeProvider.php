@@ -10,6 +10,7 @@ use Everlution\TubeBundle\Event\TubeEvents;
 use Everlution\TubeBundle\EventDispatcher\JobEvent;
 use Everlution\TubeBundle\EventDispatcher\DefaultEvent;
 use Everlution\TubeBundle\Event\JobEvents;
+use Everlution\TubeBundle\Exception\ServiceDownException;
 
 abstract class AbstractTubeProvider implements TubeProviderInterface
 {
@@ -31,6 +32,25 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
     public function getTubeName()
     {
         return $this->tubeName;
+    }
+
+    public function checkServiceUp()
+    {
+        try {
+            $this
+                ->adapter
+                ->checkServiceUp()
+            ;
+        } catch (ServiceDownException $e) {
+            $this
+                ->eventDispatcher
+                ->dispatch(
+                    TubeEvents::SERVICE_DOWN,
+                    new DefaultEvent($e->getMessage())
+                )
+            ;
+            throw $e;
+        }
     }
 
     private function initJob(JobInterface $job)
@@ -58,6 +78,8 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
 
     public function produce(JobInterface $job)
     {
+        $this->checkServiceUp();
+
         if ($this->isStopped()) {
             return false;
         }
@@ -79,15 +101,7 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
                     new JobEvent($job)
                 )
             ;
-        } catch (TubeException\ServiceDownException $e) {
-            $this
-                ->eventDispatcher
-                ->dispatch(
-                    TubeEvents::SERVICE_DOWN,
-                    new DefaultEvent()
-                )
-            ;
-            throw $e;
+
         } catch (TubeException\InvalidJobException $e) {
             $this
                 ->eventDispatcher
@@ -102,9 +116,13 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
 
     public function consumeNext()
     {
+        $this->checkServiceUp();
+
         if ($this->isStopped()) {
             return false;
         }
+
+        $job = null;
 
         try {
             /* @var $job \Everlution\TubeBundle\Model\Interfaces\JobInterface */
@@ -177,6 +195,8 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
 
     public function countJobsBuried()
     {
+        $this->checkServiceUp();
+
         return $this
             ->adapter
             ->countJobsBuried($this->tubeName)
@@ -185,6 +205,8 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
 
     public function countJobsDelayed()
     {
+        $this->checkServiceUp();
+
         return $this
             ->adapter
             ->countJobsDelayed($this->tubeName)
@@ -193,6 +215,8 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
 
     public function countJobsReady()
     {
+        $this->checkServiceUp();
+
         return $this
             ->adapter
             ->countJobsReady($this->tubeName)
@@ -201,6 +225,8 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
 
     public function countJobsReserved()
     {
+        $this->checkServiceUp();
+
         return $this
             ->adapter
             ->countJobsReserved($this->tubeName)
@@ -209,6 +235,8 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
 
     public function countJobsWaiting()
     {
+        $this->checkServiceUp();
+
         return $this
             ->adapter
             ->countWaitingJobs($this->tubeName)
@@ -217,6 +245,8 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
 
     public function readNextJobReady()
     {
+        $this->checkServiceUp();
+
         return $this
             ->adapter
             ->readNextJobReady($this->tubeName)

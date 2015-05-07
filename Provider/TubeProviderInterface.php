@@ -9,6 +9,8 @@ interface TubeProviderInterface extends JobFeaturesInterface
 {
     public function getTubeName();
 
+    public function checkServiceUp();
+
     public function produce(JobInterface $job);
 
     public function consumeNext();
