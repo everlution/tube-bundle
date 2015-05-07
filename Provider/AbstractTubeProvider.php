@@ -98,7 +98,7 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
                 ->eventDispatcher
                 ->dispatch(
                     JobEvents::PRODUCED,
-                    new JobEvent($job)
+                    new JobEvent($this->tubeName, $job)
                 )
             ;
 
@@ -139,7 +139,7 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
                 ->eventDispatcher
                 ->dispatch(
                     JobEvents::CONSUMED,
-                    new JobEvent($job)
+                    new JobEvent($this->tubeName, $job)
                 )
             ;
 
@@ -152,7 +152,7 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
                 ->eventDispatcher
                 ->dispatch(
                     JobEvents::FAILED,
-                    new JobEvent($job, $e->getMessage())
+                    new JobEvent($this->tubeName, $job, $e->getMessage())
                 )
             ;
 
@@ -181,7 +181,7 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
                     ->eventDispatcher
                     ->dispatch(
                         JobEvents::DISCARDED,
-                        new JobEvent($job, $e->getMessage())
+                        new JobEvent($this->tubeName, $job, $e->getMessage())
                     )
                 ;
             }
