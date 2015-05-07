@@ -1,5 +1,8 @@
 services:
 
+    everlution_tube.tube_provider_chain:
+        class: Everlution\TubeBundle\TubeProviderChain
+
     everlution_tube.serializer.job:
         class: Everlution\TubeBundle\Serializer\JMSJobSerializer
         arguments:

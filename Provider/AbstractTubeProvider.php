@@ -2,18 +2,16 @@
 
 namespace Everlution\TubeBundle\Provider;
 
-use Everlution\TubeBundle\Provider\TubeProviderInterface;
 use Everlution\TubeBundle\Adapter\AdapterInterface;
 use Everlution\TubeBundle\Model\Interfaces\JobInterface;
 use Everlution\TubeBundle\Exception as TubeException;
-use Everlution\TubeBundle\Model\Interfaces\JobFeaturesInterface;
 use Everlution\TubeBundle\Model\Traits\JobFeaturesTrait;
 use Everlution\TubeBundle\Event\TubeEvents;
 use Everlution\TubeBundle\EventDispatcher\JobEvent;
 use Everlution\TubeBundle\EventDispatcher\DefaultEvent;
 use Everlution\TubeBundle\Event\JobEvents;
 
-abstract class AbstractTubeProvider implements TubeProviderInterface, JobFeaturesInterface
+abstract class AbstractTubeProvider implements TubeProviderInterface
 {
     private $adapter;
 

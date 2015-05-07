@@ -2,9 +2,10 @@
 
 namespace Everlution\TubeBundle\Provider;
 
+use Everlution\TubeBundle\Model\Interfaces\JobFeaturesInterface;
 use Everlution\TubeBundle\Model\Interfaces\JobInterface;
 
-interface TubeProviderInterface
+interface TubeProviderInterface extends JobFeaturesInterface
 {
     public function produce(JobInterface $job);
 

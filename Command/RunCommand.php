@@ -3,6 +3,7 @@
 namespace Everlution\TubeBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Everlution\TubeBundle\Command\Traits\SelectTubeProviderTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -10,12 +11,14 @@ use Symfony\Component\Console\Input\InputOption;
 
 class RunCommand extends ContainerAwareCommand
 {
+    use SelectTubeProviderTrait;
+
     protected function configure()
     {
         $this
             ->setName('everlution_tube:run')
             ->setDescription('Run the tube consumer')
-            ->addArgument('tube_provider', InputArgument::OPTIONAL, 'The service ID of the tube consumer')
+            ->addArgument('tube-provider', InputArgument::OPTIONAL, 'The tube-provider ID')
             ->addOption(
                 'ttr',
                 null,
@@ -30,20 +33,22 @@ class RunCommand extends ContainerAwareCommand
                 'The max extra time for the script to run after the TTR expires',
                 60 * 10 // default 10 minutes
             )
+            ->addOption(
+                'jobs',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'The number of jobs to consume (if not specified it will keep going)',
+                null
+            )
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $tubeServiceId = $input->getArgument('tube_provider');
+        $tubeProvider = $this->selectTubeProvider($input, $output);
 
-        $tubeConsumer = $this
-            ->getContainer()
-            ->get($tubeServiceId)
-        ;
-
-        if ($tubeConsumer->isStopped()) {
-            $tubeConsumer->start();
+        if ($tubeProvider->isStopped()) {
+            $tubeProvider->start();
         }
 
         /*
@@ -58,13 +63,21 @@ class RunCommand extends ContainerAwareCommand
         // Set the start time
         $start_time = time();
 
+        $jobsToConsume = $input->getOption('jobs');
+
         // Continue looping as long as we don't go past the time limit
         while (time() < $start_time + $time_limit) {
-            if ($tubeConsumer->isStopped()) {
+            if ($tubeProvider->isStopped()) {
                 break;
             }
 
-            $tubeConsumer->consumeNext();
+            $tubeProvider->consumeNext();
+
+            if ($jobsToConsume !== null && $jobsToConsume > 0) {
+                $jobsToConsume--;
+            } else {
+                break;
+            }
 
             gc_collect_cycles();
         }
