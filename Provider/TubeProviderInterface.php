@@ -15,10 +15,8 @@ interface TubeProviderInterface extends JobFeaturesInterface
 
     public function consumeNext();
 
-    public function isRunning();
-
     /**
-     * isStopped.
+     * isPaused.
      *
      * This method is used for safely stopping a queue.
      * The idea is to persist the status of the tube somewhere (database, redis, etc.)
@@ -28,21 +26,21 @@ interface TubeProviderInterface extends JobFeaturesInterface
      *
      * @return bool
      */
-    public function isStopped();
+    public function isPaused();
 
     /**
-     * stop.
+     * unpause.
      *
      * Stops the produce/consume actions persisting the status somewhere.
      */
-    public function stop();
+    public function pause();
 
     /**
-     * start.
+     * play.
      *
      * Starts the produce/consume actions persisting the status somewhere.
      */
-    public function start();
+    public function unpause();
 
     /**
      * validateJob.

@@ -8,9 +8,10 @@ use Everlution\TubeBundle\Exception as TubeException;
 use Everlution\TubeBundle\Model\Traits\JobFeaturesTrait;
 use Everlution\TubeBundle\Event\TubeEvents;
 use Everlution\TubeBundle\EventDispatcher\JobEvent;
-use Everlution\TubeBundle\EventDispatcher\DefaultEvent;
+use Everlution\TubeBundle\EventDispatcher\TubeEvent;
 use Everlution\TubeBundle\Event\JobEvents;
 use Everlution\TubeBundle\Exception\ServiceDownException;
+use Everlution\TubeBundle\Runner\RunnerInterface;
 
 abstract class AbstractTubeProvider implements TubeProviderInterface
 {
@@ -18,14 +19,17 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
 
     private $tubeName;
 
+    private $runner;
+
     private $eventDispatcher;
 
     use JobFeaturesTrait;
 
-    public function __construct(AdapterInterface $adapter, $tubeName, $eventDispatcher)
+    public function __construct(AdapterInterface $adapter, $tubeName, RunnerInterface $runner, $eventDispatcher)
     {
         $this->adapter = $adapter;
         $this->tubeName = $tubeName;
+        $this->runner = $runner;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -44,10 +48,7 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
         } catch (ServiceDownException $e) {
             $this
                 ->eventDispatcher
-                ->dispatch(
-                    TubeEvents::SERVICE_DOWN,
-                    new DefaultEvent($e->getMessage())
-                )
+                ->dispatch(TubeEvents::SERVICE_DOWN, new TubeEvent($e->getMessage()))
             ;
             throw $e;
         }
@@ -80,7 +81,7 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
     {
         $this->checkServiceUp();
 
-        if ($this->isStopped()) {
+        if ($this->isPaused()) {
             return false;
         }
 
@@ -93,22 +94,15 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
                 ->adapter
                 ->produce($this->tubeName, $job)
             ;
-
             $this
                 ->eventDispatcher
-                ->dispatch(
-                    JobEvents::PRODUCED,
-                    new JobEvent($this->tubeName, $job)
-                )
+                ->dispatch(JobEvents::PRODUCED, new JobEvent($this->tubeName, $job))
             ;
 
         } catch (TubeException\InvalidJobException $e) {
             $this
                 ->eventDispatcher
-                ->dispatch(
-                    JobEvents::INVALID,
-                    new DefaultEvent()
-                )
+                ->dispatch(JobEvents::INVALID, new JobEvent($this->tubeName, $job))
             ;
             throw $e;
         }
@@ -118,7 +112,7 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
     {
         $this->checkServiceUp();
 
-        if ($this->isStopped()) {
+        if ($this->isPaused()) {
             return false;
         }
 
@@ -131,29 +125,47 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
                 ->reserve($this->tubeName)
             ;
 
+            $this
+                ->eventDispatcher
+                ->dispatch(JobEvents::RESERVED, new JobEvent($this->tubeName, $job))
+            ;
+
             $this->validateJob($job);
 
             $this->consumeOne($job);
 
             $this
                 ->eventDispatcher
-                ->dispatch(
-                    JobEvents::CONSUMED,
-                    new JobEvent($this->tubeName, $job)
-                )
+                ->dispatch(JobEvents::CONSUMED, new JobEvent($this->tubeName, $job))
             ;
 
             $this
                 ->adapter
                 ->delete($this->tubeName, $job)
             ;
+
+            $this
+                ->eventDispatcher
+                ->dispatch(JobEvents::DELETED, new JobEvent($this->tubeName, $job))
+            ;
+
+        } catch (TubeException\InvalidJobException $e) {
+            $this
+                ->eventDispatcher
+                ->dispatch(JobEvents::INVALID, new JobEvent($this->tubeName, $job))
+            ;
+            $this
+                ->adapter
+                ->bury($this->tubeName, $job)
+            ;
+            $this
+                ->eventDispatcher
+                ->dispatch(JobEvents::BURIED, new JobEvent($this->tubeName, $job))
+            ;
         } catch (\Exception $e) {
             $this
                 ->eventDispatcher
-                ->dispatch(
-                    JobEvents::FAILED,
-                    new JobEvent($this->tubeName, $job, $e->getMessage())
-                )
+                ->dispatch(JobEvents::FAILED, new JobEvent($this->tubeName, $job, $e->getMessage()))
             ;
 
             $retries = $this
@@ -164,33 +176,24 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
             if ($retries <= $job->getMaxRetriesOnFailure()) {
                 $this
                     ->adapter
-                    ->release(
-                        $this->tubeName,
-                        $job
-                    )
+                    ->release($this->tubeName, $job)
+                ;
+
+                $this
+                    ->eventDispatcher
+                    ->dispatch(JobEvents::RELEASED, new JobEvent($this->tubeName, $job))
                 ;
             } else {
                 $this
                     ->adapter
-                    ->bury(
-                        $this->tubeName,
-                        $job
-                    )
+                    ->bury($this->tubeName, $job)
                 ;
                 $this
                     ->eventDispatcher
-                    ->dispatch(
-                        JobEvents::DISCARDED,
-                        new JobEvent($this->tubeName, $job, $e->getMessage())
-                    )
+                    ->dispatch(JobEvents::BURIED, new JobEvent($this->tubeName, $job, $e->getMessage()))
                 ;
             }
         }
-    }
-
-    final public function isRunning()
-    {
-        return !$this->isStopped();
     }
 
     public function countJobsBuried()
@@ -250,6 +253,46 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
         return $this
             ->adapter
             ->readNextJobReady($this->tubeName)
+        ;
+    }
+
+    public function isPaused()
+    {
+        return $this
+            ->runner
+            ->isPaused($this->tubeName)
+        ;
+    }
+
+    public function pause()
+    {
+        $this
+            ->runner
+            ->pause($this->tubeName)
+        ;
+
+        $this
+            ->eventDispatcher
+            ->dispatch(
+                TubeEvents::PAUSED,
+                new TubeEvent(sprintf('Tube <%s> paused', $this->tubeName))
+            )
+        ;
+    }
+
+    public function unpause()
+    {
+        $this
+            ->runner
+            ->unpause($this->tubeName)
+        ;
+
+        $this
+            ->eventDispatcher
+            ->dispatch(
+                TubeEvents::PAUSED,
+                new TubeEvent(sprintf('Tube <%s> unpaused', $this->tubeName))
+            )
         ;
     }
 }

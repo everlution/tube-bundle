@@ -2,7 +2,7 @@
 
 namespace Everlution\TubeBundle\EventDispatcher;
 
-class DefaultEvent extends \Symfony\Component\EventDispatcher\Event
+class TubeEvent extends \Symfony\Component\EventDispatcher\Event
 {
     private $message;
 

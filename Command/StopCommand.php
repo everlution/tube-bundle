@@ -23,10 +23,10 @@ class StopCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $tubeProvider = $this->selectTubeProvider($input, $output);
+        $tubeProvider = $this->selectTubeProvider($input, $output, 'STARTED');
 
-        if ($tubeProvider->isRunning()) {
-            $tubeProvider->stop();
+        if (!$tubeProvider->isPaused()) {
+            $tubeProvider->pause();
         }
 
         $output->writeln('<comment>Stopping tube provider</comment>');

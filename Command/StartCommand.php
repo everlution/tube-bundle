@@ -23,10 +23,10 @@ class StartCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $tubeProvider = $this->selectTubeProvider($input, $output);
+        $tubeProvider = $this->selectTubeProvider($input, $output, 'PAUSED');
 
-        if ($tubeProvider->isStopped()) {
-            $tubeProvider->start();
+        if ($tubeProvider->isPaused()) {
+            $tubeProvider->unpause();
         }
 
         $output->writeln('<comment>Tube provider started</comment>');

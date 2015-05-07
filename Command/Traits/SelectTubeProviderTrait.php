@@ -8,7 +8,7 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 
 trait SelectTubeProviderTrait
 {
-    private function getTubeProviders()
+    private function getTubeProviders($status = null)
     {
         $tubeProviders = $this
             ->getContainer()
@@ -18,13 +18,21 @@ trait SelectTubeProviderTrait
 
         $choices = array();
         foreach ($tubeProviders as $serviceId => $tubeProvider) {
+            if ($status) {
+                if ($status == 'PAUSED' && !$tubeProvider->isPaused()) {
+                    continue;
+                }
+                if ($status == 'UNPAUSED' && $tubeProvider->isPaused()) {
+                    continue;
+                }
+            }
             $choices[] = $serviceId;
         }
 
         return $choices;
     }
 
-    private function selectTubeProvider(InputInterface $input, OutputInterface $output)
+    private function selectTubeProvider(InputInterface $input, OutputInterface $output, $status = null)
     {
         $selectedTubeProvider = $input->getArgument('tube-provider');
 
@@ -32,7 +40,7 @@ trait SelectTubeProviderTrait
             $helper = $this->getHelper('question');
             $question = new ChoiceQuestion(
                 'Please select the tube provider',
-                $this->getTubeProviders()
+                $this->getTubeProviders($status)
             );
             $selectedTubeProvider = $helper->ask($input, $output, $question);
         }

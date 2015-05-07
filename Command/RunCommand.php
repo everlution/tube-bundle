@@ -63,7 +63,7 @@ class RunCommand extends ContainerAwareCommand
 
         // Continue looping as long as we don't go past the time limit
         while (time() < $start_time + $time_limit) {
-            if ($tubeProvider->isStopped()) {
+            if ($tubeProvider->isPaused()) {
                 break;
             }
 

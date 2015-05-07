@@ -33,7 +33,7 @@ class InfoCommand extends ContainerAwareCommand
             ->setHeaders(array('Attribute', 'Value'))
             ->setRows(array(
                 array('Tube name', $tubeProvider->getTubeName()),
-                array('Status', $tubeProvider->isStopped() ? 'STOPPED' : 'RUNNING'),
+                array('Status', $tubeProvider->isPaused() ? 'PAUSED' : 'RUNNING'),
                 new TableSeparator(),
                 array('Default priority', $tubeProvider->getPriority()),
                 array('Default max retries on failure', $tubeProvider->getMaxRetriesOnFailure()),
