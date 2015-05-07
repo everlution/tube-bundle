@@ -24,8 +24,8 @@
         "symfony/var-dumper": "2.6.*"
     },
     "autoload" : {
-        "psr-0" : {
-            "Everlution\\TubeBundle" : ""
+        "psr-4" : {
+            "Everlution\\TubeBundle\\" : ""
         }
     }
 }
