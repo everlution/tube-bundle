@@ -4,12 +4,9 @@ namespace Everlution\TubeBundle\Exception;
 
 class InvalidJobException extends \Exception
 {
-    public function __construct($payload, $actual, $code, $previous)
+    public function __construct($message, $code, $previous)
     {
-        $message = sprintf(
-            'Invalid values for job %s',
-            $payload
-        );
+        $message = sprintf('Invalid job: %s', $message);
 
         parent::__construct($message, $code, $previous);
     }

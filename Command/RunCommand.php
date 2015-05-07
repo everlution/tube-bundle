@@ -18,14 +18,14 @@ class RunCommand extends ContainerAwareCommand
             ->addArgument('tube_provider', InputArgument::OPTIONAL, 'The service ID of the tube consumer')
             ->addOption(
                 'ttr',
-                't',
+                null,
                 InputOption::VALUE_OPTIONAL,
                 'The minimum Time To Run for the script',
                 60 * 60 // default 1 hour
             )
             ->addOption(
                 'extra',
-                'e',
+                null,
                 InputOption::VALUE_OPTIONAL,
                 'The max extra time for the script to run after the TTR expires',
                 60 * 10 // default 10 minutes

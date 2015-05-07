@@ -11,4 +11,6 @@ abstract class JobEvents
     const FAILED = 'everlution_tube.event.job.failed';
 
     const DISCARDED = 'everlution_tube.event.job.discarded';
+
+    const INVALID = 'everlution_tube.event.job.invalid';
 }
