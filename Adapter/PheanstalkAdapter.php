@@ -154,9 +154,13 @@ class PheanstalkAdapter extends AbstractAdapter
         ;
     }
 
-    public function countRetries(JobInterface $job)
+    public function countJobRetries(JobInterface $job)
     {
         $this->checkServiceUp();
+
+        if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
+            return 0;
+        }
 
         $stats = $this
             ->pheanstalk
@@ -166,5 +170,106 @@ class PheanstalkAdapter extends AbstractAdapter
         ;
 
         return $stats['releases'];
+    }
+
+    public function countJobsBuried($tubeName)
+    {
+        $this->checkServiceUp();
+
+        if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
+            return 0;
+        }
+
+        $stats = $this
+            ->pheanstalk
+            ->statsTube($tubeName)
+        ;
+
+        return isset($stats['current-jobs-buried']) ? $stats['current-jobs-buried'] : 0;
+    }
+
+    public function countJobsReady($tubeName)
+    {
+        $this->checkServiceUp();
+
+        if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
+            return 0;
+        }
+
+        $stats = $this
+            ->pheanstalk
+            ->statsTube($tubeName)
+        ;
+
+        return isset($stats['current-jobs-ready']) ? $stats['current-jobs-ready'] : 0;
+    }
+
+    public function countJobsDelayed($tubeName)
+    {
+        $this->checkServiceUp();
+
+        if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
+            return 0;
+        }
+
+        $stats = $this
+            ->pheanstalk
+            ->statsTube($tubeName)
+        ;
+
+        return isset($stats['current-jobs-delayed']) ? $stats['current-jobs-delayed'] : 0;
+    }
+
+    public function countJobsReserved($tubeName)
+    {
+        $this->checkServiceUp();
+
+        if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
+            return 0;
+        }
+
+        $stats = $this
+            ->pheanstalk
+            ->statsTube($tubeName)
+        ;
+
+        return isset($stats['current-jobs-reserved']) ? $stats['current-jobs-reserved'] : 0;
+    }
+
+    public function countWaitingJobs($tubeName)
+    {
+        $this->checkServiceUp();
+
+        if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
+            return 0;
+        }
+
+        $stats = $this
+            ->pheanstalk
+            ->statsTube($tubeName)
+        ;
+
+        return isset($stats['current-jobs-waiting']) ? $stats['current-jobs-waiting'] : 0;
+    }
+
+    public function readNextJobReady($tubeName)
+    {
+        if ($this->countJobsReady($tubeName) == 0) {
+            return;
+        }
+
+        $pheanstalkJob = $this
+            ->pheanstalk
+            ->peekReady($tubeName)
+        ;
+
+        $job = $this
+            ->jobSerializer
+            ->deserialize($pheanstalkJob->getData())
+        ;
+
+        $job->setId($pheanstalkJob->getId());
+
+        return $job;
     }
 }

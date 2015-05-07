@@ -47,10 +47,6 @@ class RunCommand extends ContainerAwareCommand
     {
         $tubeProvider = $this->selectTubeProvider($input, $output);
 
-        if ($tubeProvider->isStopped()) {
-            $tubeProvider->start();
-        }
-
         /*
          * We'll set our base time, which is one hour (in seconds).
          * Once we have our base time, we'll add anywhere between 0
@@ -71,13 +67,15 @@ class RunCommand extends ContainerAwareCommand
                 break;
             }
 
-            $tubeProvider->consumeNext();
-
-            if ($jobsToConsume !== null && $jobsToConsume > 0) {
-                $jobsToConsume--;
-            } else {
-                break;
+            if ($jobsToConsume !== null) {
+                if ($jobsToConsume > 0) {
+                    $jobsToConsume--;
+                } else {
+                    break;
+                }
             }
+
+            $tubeProvider->consumeNext();
 
             gc_collect_cycles();
         }

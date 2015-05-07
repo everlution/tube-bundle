@@ -21,10 +21,10 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
 
     use JobFeaturesTrait;
 
-    public function __construct(AdapterInterface $adapter, $queueName, $eventDispatcher)
+    public function __construct(AdapterInterface $adapter, $tubeName, $eventDispatcher)
     {
         $this->adapter = $adapter;
-        $this->tubeName = $queueName;
+        $this->tubeName = $tubeName;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -173,5 +173,53 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
     final public function isRunning()
     {
         return !$this->isStopped();
+    }
+
+    public function countJobsBuried()
+    {
+        return $this
+            ->adapter
+            ->countJobsBuried($this->tubeName)
+        ;
+    }
+
+    public function countJobsDelayed()
+    {
+        return $this
+            ->adapter
+            ->countJobsDelayed($this->tubeName)
+        ;
+    }
+
+    public function countJobsReady()
+    {
+        return $this
+            ->adapter
+            ->countJobsReady($this->tubeName)
+        ;
+    }
+
+    public function countJobsReserved()
+    {
+        return $this
+            ->adapter
+            ->countJobsReserved($this->tubeName)
+        ;
+    }
+
+    public function countJobsWaiting()
+    {
+        return $this
+            ->adapter
+            ->countWaitingJobs($this->tubeName)
+        ;
+    }
+
+    public function readNextJobReady()
+    {
+        return $this
+            ->adapter
+            ->readNextJobReady($this->tubeName)
+        ;
     }
 }

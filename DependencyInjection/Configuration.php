@@ -22,18 +22,6 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->arrayNode('beanstalkd')
-                    ->children()
-                        ->scalarNode('host')
-                            ->cannotBeEmpty()
-                            ->isRequired()
-                        ->end()
-                        ->scalarNode('port')
-                            ->cannotBeEmpty()
-                            ->isRequired()
-                        ->end()
-                    ->end()
-                ->end()
                 ->scalarNode('job_class')
                     ->cannotBeEmpty()
                     ->defaultValue('Everlution\TubeBundle\Model\Job')

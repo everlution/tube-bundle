@@ -25,16 +25,6 @@ class EverlutionTubeExtension extends Extension
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
 
-        $beanstalkd = $config['beanstalkd'];
-
-        $pheanstalkDefinition = $container
-            ->register('everlution_tube.pheanstalk', 'Pheanstalk\Pheanstalk')
-            ->setArguments(array(
-                $beanstalkd['host'],
-                $beanstalkd['port'],
-            ))
-        ;
-
         $jobFactoryDefinition = $container
             ->register('everlution_tube.factory.job', 'Everlution\TubeBundle\Factory\JobFactory')
             ->setArguments(array(

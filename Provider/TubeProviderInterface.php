@@ -7,6 +7,8 @@ use Everlution\TubeBundle\Model\Interfaces\JobInterface;
 
 interface TubeProviderInterface extends JobFeaturesInterface
 {
+    public function getTubeName();
+
     public function produce(JobInterface $job);
 
     public function consumeNext();
@@ -59,4 +61,16 @@ interface TubeProviderInterface extends JobFeaturesInterface
      * happens.
      */
     public function consumeOne(JobInterface $job);
+
+    public function countJobsReady();
+
+    public function countJobsBuried();
+
+    public function countJobsDelayed();
+
+    public function countJobsReserved();
+
+    public function countJobsWaiting();
+
+    public function readNextJobReady();
 }
