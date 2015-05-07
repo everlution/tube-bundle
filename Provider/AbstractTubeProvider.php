@@ -11,7 +11,7 @@ use Everlution\TubeBundle\EventDispatcher\JobEvent;
 use Everlution\TubeBundle\EventDispatcher\TubeEvent;
 use Everlution\TubeBundle\Event\JobEvents;
 use Everlution\TubeBundle\Exception\ServiceDownException;
-use Everlution\TubeBundle\Runner\RunnerInterface;
+use Everlution\TubeBundle\Manager\ManagerInterface;
 
 abstract class AbstractTubeProvider implements TubeProviderInterface
 {
@@ -19,17 +19,17 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
 
     private $tubeName;
 
-    private $runner;
+    private $manager;
 
     private $eventDispatcher;
 
     use JobFeaturesTrait;
 
-    public function __construct(AdapterInterface $adapter, $tubeName, RunnerInterface $runner, $eventDispatcher)
+    public function __construct(AdapterInterface $adapter, $tubeName, ManagerInterface $manager, $eventDispatcher)
     {
         $this->adapter = $adapter;
         $this->tubeName = $tubeName;
-        $this->runner = $runner;
+        $this->manager = $manager;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -81,7 +81,7 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
     {
         $this->checkServiceUp();
 
-        if ($this->isPaused()) {
+        if (!$this->isEnabled()) {
             return false;
         }
 
@@ -112,7 +112,7 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
     {
         $this->checkServiceUp();
 
-        if ($this->isPaused()) {
+        if (!$this->isEnabled()) {
             return false;
         }
 
@@ -256,42 +256,42 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
         ;
     }
 
-    public function isPaused()
+    public function isEnabled()
     {
         return $this
-            ->runner
-            ->isPaused($this->tubeName)
+            ->manager
+            ->isEnabled($this->tubeName)
         ;
     }
 
-    public function pause()
+    public function enable()
     {
         $this
-            ->runner
-            ->pause($this->tubeName)
+            ->manager
+            ->enable($this->tubeName)
         ;
 
         $this
             ->eventDispatcher
             ->dispatch(
-                TubeEvents::PAUSED,
-                new TubeEvent(sprintf('Tube <%s> paused', $this->tubeName))
+                TubeEvents::ENABLED,
+                new TubeEvent(sprintf('Tube <%s> enabled', $this->tubeName))
             )
         ;
     }
 
-    public function unpause()
+    public function disable()
     {
         $this
-            ->runner
-            ->unpause($this->tubeName)
+            ->manager
+            ->disable($this->tubeName)
         ;
 
         $this
             ->eventDispatcher
             ->dispatch(
-                TubeEvents::PAUSED,
-                new TubeEvent(sprintf('Tube <%s> unpaused', $this->tubeName))
+                TubeEvents::DISABLED,
+                new TubeEvent(sprintf('Tube <%s> disabled', $this->tubeName))
             )
         ;
     }

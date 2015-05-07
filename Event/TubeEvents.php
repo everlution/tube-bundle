@@ -6,7 +6,7 @@ abstract class TubeEvents
 {
     const SERVICE_DOWN = 'everlution.tube.event.tube.service_down';
 
-    const PAUSED = 'everlution.tube.event.tube.paused';
+    const ENABLED = 'everlution.tube.event.tube.enabled';
 
-    const UNPAUSED = 'everlution.tube.event.tube.unpaused';
+    const DISABLED = 'everlution.tube.event.tube.disabled';
 }
