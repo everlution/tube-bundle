@@ -4,12 +4,13 @@ namespace Everlution\TubeBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Everlution\TubeBundle\Command\Traits\SelectTubeProviderTrait;
+use Everlution\TubeBundle\Command\Interfaces\SelectTubeProviderInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
-class RunCommand extends ContainerAwareCommand
+class RunCommand extends ContainerAwareCommand implements SelectTubeProviderInterface
 {
     use SelectTubeProviderTrait;
 
