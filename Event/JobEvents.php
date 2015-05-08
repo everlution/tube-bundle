@@ -19,4 +19,6 @@ abstract class JobEvents
     const BURIED = 'everlution_tube.event.job.buried';
 
     const INVALID = 'everlution_tube.event.job.invalid';
+
+    const UNKNOWN_ERROR = 'everlution_tube.event.job.unknown_error';
 }

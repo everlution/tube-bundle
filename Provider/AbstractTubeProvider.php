@@ -48,7 +48,10 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
         } catch (ServiceDownException $e) {
             $this
                 ->eventDispatcher
-                ->dispatch(TubeEvents::SERVICE_DOWN, new TubeEvent($e->getMessage()))
+                ->dispatch(
+                    TubeEvents::SERVICE_DOWN,
+                    new TubeEvent($this->tubeName, $e->getMessage())
+                )
             ;
             throw $e;
         }
@@ -81,10 +84,6 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
     {
         $this->checkServiceUp();
 
-        if (!$this->isEnabled()) {
-            return false;
-        }
-
         $this->initJob($job);
 
         try {
@@ -98,11 +97,16 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
                 ->eventDispatcher
                 ->dispatch(JobEvents::PRODUCED, new JobEvent($this->tubeName, $job))
             ;
-
         } catch (TubeException\InvalidJobException $e) {
             $this
                 ->eventDispatcher
                 ->dispatch(JobEvents::INVALID, new JobEvent($this->tubeName, $job))
+            ;
+            throw $e;
+        } catch (\Exception $e) {
+            $this
+                ->eventDispatcher
+                ->dispatch(JobEvents::UNKNOWN_ERROR, new JobEvent($this->tubeName, $job))
             ;
             throw $e;
         }
@@ -148,7 +152,6 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
                 ->eventDispatcher
                 ->dispatch(JobEvents::DELETED, new JobEvent($this->tubeName, $job))
             ;
-
         } catch (TubeException\InvalidJobException $e) {
             $this
                 ->eventDispatcher
@@ -161,6 +164,19 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
             $this
                 ->eventDispatcher
                 ->dispatch(JobEvents::BURIED, new JobEvent($this->tubeName, $job))
+            ;
+        } catch (TubeException\JobConsumeException $e) {
+            $this
+                ->eventDispatcher
+                ->dispatch(JobEvents::FAILED, new JobEvent($this->tubeName, $job))
+            ;
+            $this
+                ->adapter
+                ->bury($this->tubeName, $job)
+            ;
+            $this
+                ->eventDispatcher
+                ->dispatch(JobEvents::BURIED, new JobEvent($this->tubeName, $job, $e->getMessage()))
             ;
         } catch (\Exception $e) {
             $this
@@ -275,7 +291,7 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
             ->eventDispatcher
             ->dispatch(
                 TubeEvents::ENABLED,
-                new TubeEvent(sprintf('Tube <%s> enabled', $this->tubeName))
+                new TubeEvent($this->tubeName)
             )
         ;
     }
@@ -291,7 +307,7 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
             ->eventDispatcher
             ->dispatch(
                 TubeEvents::DISABLED,
-                new TubeEvent(sprintf('Tube <%s> disabled', $this->tubeName))
+                new TubeEvent($this->tubeName)
             )
         ;
     }
