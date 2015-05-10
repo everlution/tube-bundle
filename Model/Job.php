@@ -11,6 +11,10 @@ class Job implements JobInterface
 {
     use JobFeaturesTrait;
 
+    /**
+     * @Expose
+     * @Type("integer")
+     */
     private $id;
 
     /**

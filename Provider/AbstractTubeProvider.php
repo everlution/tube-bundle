@@ -186,7 +186,7 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
 
             $retries = $this
                 ->adapter
-                ->countRetries($job)
+                ->countJobRetries($job)
             ;
 
             if ($retries <= $job->getMaxRetriesOnFailure()) {
