@@ -1,11 +1,9 @@
 services:
 
-    everlution_tube.tube_provider_chain:
-        class: Everlution\TubeBundle\TubeProviderChain
+    everlution_tube.tube_chain:
+        class: Everlution\TubeBundle\TubeChain
 
-    everlution_tube.serializer.job:
-        class: Everlution\TubeBundle\Serializer\JMSJobSerializer
+    everlution_tube.serializer.job_json:
+        class: Everlution\TubeBundle\Serializer\DefaultJsonJobSerializer
         arguments:
-            - @jms_serializer
-            - 'json'
             - Everlution\TubeBundle\Model\Job

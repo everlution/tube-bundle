@@ -3,15 +3,15 @@
 namespace Everlution\TubeBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use Everlution\TubeBundle\Command\Traits\SelectTubeProviderTrait;
-use Everlution\TubeBundle\Command\Interfaces\SelectTubeProviderInterface;
+use Everlution\TubeBundle\Command\Traits\SelectTubeTrait;
+use Everlution\TubeBundle\Command\Interfaces\SelectTubeInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\Table;
 
-class StatusCommand extends ContainerAwareCommand implements SelectTubeProviderInterface
+class StatusCommand extends ContainerAwareCommand implements SelectTubeInterface
 {
-    use SelectTubeProviderTrait;
+    use SelectTubeTrait;
 
     protected function configure()
     {
@@ -23,7 +23,7 @@ class StatusCommand extends ContainerAwareCommand implements SelectTubeProviderI
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $tubeProvidersIds = $this->getTubeProvidersIds(self::ALL_TUBES);
+        $tubes = $this->getTubes(self::ALL_TUBES);
 
         $table = new Table($output);
         $table->setHeaders(array(
@@ -33,24 +33,22 @@ class StatusCommand extends ContainerAwareCommand implements SelectTubeProviderI
             'Reserved',
             'Ready',
             'Waiting',
+            'Completed',
             'Delayed',
             'Buried',
         ));
 
-        foreach ($tubeProvidersIds as $tubeProviderId) {
-            $tubeProvider = $this
-                ->getContainer()
-                ->get($tubeProviderId)
-            ;
+        foreach ($tubes as $tubeId => $tube) {
             $table->addRow(array(
-                $tubeProviderId,
-                $tubeProvider->getTubeName(),
-                $tubeProvider->isEnabled() ? 'ENABLED' : 'DISABLED',
-                $tubeProvider->countJobsReserved(),
-                $tubeProvider->countJobsReady(),
-                $tubeProvider->countJobsWaiting(),
-                $tubeProvider->countJobsDelayed(),
-                $tubeProvider->countJobsBuried(),
+                $tubeId,
+                $tube->getTubeName(),
+                $tube->isEnabled() ? 'ENABLED' : 'DISABLED',
+                sprintf('<comment>%s</comment>', $tube->countJobsReserved()),
+                $tube->countJobsReady(),
+                $tube->countJobsWaiting(),
+                $tube->countJobsCompleted(),
+                $tube->countJobsDelayed(),
+                $tube->countJobsBuried(),
             ));
         }
 

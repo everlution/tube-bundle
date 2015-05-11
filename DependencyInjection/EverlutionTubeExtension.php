@@ -31,5 +31,12 @@ class EverlutionTubeExtension extends Extension
                 $config['job_class'],
             ))
         ;
+
+        $jobSerializerDefinition = $container
+            ->register('everlution_tube.serializer.job', $config['job_serializer'])
+            ->setArguments(array(
+                $jobFactoryDefinition,
+            ))
+        ;
     }
 }

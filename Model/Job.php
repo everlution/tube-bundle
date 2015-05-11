@@ -2,8 +2,6 @@
 
 namespace Everlution\TubeBundle\Model;
 
-use JMS\Serializer\Annotation\Expose;
-use JMS\Serializer\Annotation\Type;
 use Everlution\TubeBundle\Model\Interfaces\JobInterface;
 use Everlution\TubeBundle\Model\Traits\JobFeaturesTrait;
 
@@ -11,16 +9,8 @@ class Job implements JobInterface
 {
     use JobFeaturesTrait;
 
-    /**
-     * @Expose
-     * @Type("integer")
-     */
     private $id;
 
-    /**
-     * @Expose
-     * @Type("array")
-     */
     private $payload;
 
     public function __construct()

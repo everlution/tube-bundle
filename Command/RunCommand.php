@@ -3,23 +3,23 @@
 namespace Everlution\TubeBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use Everlution\TubeBundle\Command\Traits\SelectTubeProviderTrait;
-use Everlution\TubeBundle\Command\Interfaces\SelectTubeProviderInterface;
+use Everlution\TubeBundle\Command\Traits\SelectTubeTrait;
+use Everlution\TubeBundle\Command\Interfaces\SelectTubeInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
-class RunCommand extends ContainerAwareCommand implements SelectTubeProviderInterface
+class RunCommand extends ContainerAwareCommand implements SelectTubeInterface
 {
-    use SelectTubeProviderTrait;
+    use SelectTubeTrait;
 
     protected function configure()
     {
         $this
             ->setName('everlution_tube:run')
             ->setDescription('Run the tube consumer')
-            ->addArgument('tube-provider', InputArgument::OPTIONAL, 'The tube-provider ID')
+            ->addArgument('tube', InputArgument::OPTIONAL, 'The tube ID')
             ->addOption(
                 'ttr',
                 null,
@@ -46,7 +46,7 @@ class RunCommand extends ContainerAwareCommand implements SelectTubeProviderInte
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $tubeProvider = $this->selectTubeProvider($input, $output);
+        $tube = $this->selectTube($input, $output, self::ENABLED_TUBES);
 
         /*
          * We'll set our base time, which is one hour (in seconds).
@@ -64,7 +64,8 @@ class RunCommand extends ContainerAwareCommand implements SelectTubeProviderInte
 
         // Continue looping as long as we don't go past the time limit
         while (time() < $start_time + $time_limit) {
-            if (!$tubeProvider->isEnabled()) {
+            if (!$tube->isEnabled()) {
+                $output->writeln('<info>This tube is disabled</info>');
                 break;
             }
 
@@ -76,7 +77,7 @@ class RunCommand extends ContainerAwareCommand implements SelectTubeProviderInte
                 }
             }
 
-            $tubeProvider->consumeNext();
+            $tube->consumeNext();
 
             gc_collect_cycles();
         }

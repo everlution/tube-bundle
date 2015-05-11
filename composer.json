@@ -16,7 +16,6 @@
     ],
     "require" : {
         "php": ">=5.3.3",
-        "jms/serializer-bundle": "dev-master",
         "pda/pheanstalk": "3.*"
     },
     "require-dev": {

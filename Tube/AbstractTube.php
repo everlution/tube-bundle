@@ -1,6 +1,6 @@
 <?php
 
-namespace Everlution\TubeBundle\Provider;
+namespace Everlution\TubeBundle\Tube;
 
 use Everlution\TubeBundle\Adapter\AdapterInterface;
 use Everlution\TubeBundle\Model\Interfaces\JobInterface;
@@ -12,8 +12,9 @@ use Everlution\TubeBundle\EventDispatcher\TubeEvent;
 use Everlution\TubeBundle\Event\JobEvents;
 use Everlution\TubeBundle\Exception\ServiceDownException;
 use Everlution\TubeBundle\Manager\ManagerInterface;
+use Everlution\TubeBundle\Factory\JobFactory;
 
-abstract class AbstractTubeProvider implements TubeProviderInterface
+abstract class AbstractTube implements TubeInterface
 {
     private $adapter;
 
@@ -21,15 +22,23 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
 
     private $manager;
 
+    protected $jobFactory;
+
     private $eventDispatcher;
 
     use JobFeaturesTrait;
 
-    public function __construct(AdapterInterface $adapter, $tubeName, ManagerInterface $manager, $eventDispatcher)
-    {
+    public function __construct(
+        AdapterInterface $adapter,
+        $tubeName,
+        ManagerInterface $manager,
+        JobFactory $jobFactory,
+        $eventDispatcher
+    ) {
         $this->adapter = $adapter;
         $this->tubeName = $tubeName;
         $this->manager = $manager;
+        $this->jobFactory = $jobFactory;
         $this->eventDispatcher = $eventDispatcher;
     }
 
@@ -165,19 +174,6 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
                 ->eventDispatcher
                 ->dispatch(JobEvents::BURIED, new JobEvent($this->tubeName, $job))
             ;
-        } catch (TubeException\JobConsumeException $e) {
-            $this
-                ->eventDispatcher
-                ->dispatch(JobEvents::FAILED, new JobEvent($this->tubeName, $job))
-            ;
-            $this
-                ->adapter
-                ->bury($this->tubeName, $job)
-            ;
-            $this
-                ->eventDispatcher
-                ->dispatch(JobEvents::BURIED, new JobEvent($this->tubeName, $job, $e->getMessage()))
-            ;
         } catch (\Exception $e) {
             $this
                 ->eventDispatcher
@@ -258,7 +254,17 @@ abstract class AbstractTubeProvider implements TubeProviderInterface
 
         return $this
             ->adapter
-            ->countWaitingJobs($this->tubeName)
+            ->countJobsWaiting($this->tubeName)
+        ;
+    }
+
+    public function countJobsCompleted()
+    {
+        $this->checkServiceUp();
+
+        return $this
+            ->adapter
+            ->countJobsCompleted($this->tubeName)
         ;
     }
 

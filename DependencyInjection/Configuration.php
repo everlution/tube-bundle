@@ -26,6 +26,10 @@ class Configuration implements ConfigurationInterface
                     ->cannotBeEmpty()
                     ->defaultValue('Everlution\TubeBundle\Model\Job')
                 ->end()
+                ->scalarNode('job_serializer')
+                    ->cannotBeEmpty()
+                    ->defaultValue('Everlution\TubeBundle\Serializer\DefaultJsonJobSerializer')
+                ->end()
             ->end()
         ;
 

@@ -1,17 +1,19 @@
 <?php
 
-namespace Everlution\TubeBundle\Provider;
+namespace Everlution\TubeBundle\Tube;
 
 use Everlution\TubeBundle\Model\Interfaces\JobFeaturesInterface;
 use Everlution\TubeBundle\Model\Interfaces\JobInterface;
 
-interface TubeProviderInterface extends JobFeaturesInterface
+interface TubeInterface extends JobFeaturesInterface
 {
     public function getTubeName();
 
     public function checkServiceUp();
 
     public function produce(JobInterface $job);
+
+    public function produceAll();
 
     public function consumeNext();
 
@@ -65,6 +67,8 @@ interface TubeProviderInterface extends JobFeaturesInterface
     public function countJobsReserved();
 
     public function countJobsWaiting();
+
+    public function countJobsCompleted();
 
     public function readNextJobReady();
 }

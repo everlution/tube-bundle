@@ -82,7 +82,9 @@ interface AdapterInterface
 
     public function countJobsReserved($tubeName);
 
-    public function countWaitingJobs($tubeName);
+    public function countJobsWaiting($tubeName);
+
+    public function countJobsCompleted($tubeName);
 
     public function readNextJobReady($tubeName);
 }

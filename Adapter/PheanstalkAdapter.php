@@ -212,7 +212,7 @@ class PheanstalkAdapter extends AbstractAdapter
         return isset($stats['current-jobs-reserved']) ? $stats['current-jobs-reserved'] : 0;
     }
 
-    public function countWaitingJobs($tubeName)
+    public function countJobsWaiting($tubeName)
     {
         if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
             return 0;
@@ -224,6 +224,26 @@ class PheanstalkAdapter extends AbstractAdapter
         ;
 
         return isset($stats['current-jobs-waiting']) ? $stats['current-jobs-waiting'] : 0;
+    }
+
+    public function countJobsCompleted($tubeName)
+    {
+        if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
+            return 0;
+        }
+
+        $stats = $this
+            ->pheanstalk
+            ->statsTube($tubeName)
+        ;
+
+        return
+            $stats['total-jobs']
+            - $stats['current-jobs-ready']
+            - $stats['current-jobs-reserved']
+            - $stats['current-jobs-buried']
+            - $stats['current-jobs-delayed']
+        ;
     }
 
     public function readNextJobReady($tubeName)

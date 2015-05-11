@@ -3,31 +3,31 @@
 namespace Everlution\TubeBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use Everlution\TubeBundle\Command\Traits\SelectTubeProviderTrait;
-use Everlution\TubeBundle\Command\Interfaces\SelectTubeProviderInterface;
+use Everlution\TubeBundle\Command\Traits\SelectTubeTrait;
+use Everlution\TubeBundle\Command\Interfaces\SelectTubeInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableSeparator;
 
-class InfoCommand extends ContainerAwareCommand implements SelectTubeProviderInterface
+class InfoCommand extends ContainerAwareCommand implements SelectTubeInterface
 {
-    use SelectTubeProviderTrait;
+    use SelectTubeTrait;
 
     protected function configure()
     {
         $this
             ->setName('everlution_tube:info')
             ->setDescription('Info on the tubes')
-            ->addArgument('tube-provider', InputArgument::OPTIONAL, 'The tube name')
+            ->addArgument('tube', InputArgument::OPTIONAL, 'The tube ID')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        /* @var $tubeProvider \Everlution\TubeBundle\Provider\TubeProviderInterface */
-        $tubeProvider = $this->selectTubeProvider($input, $output, self::ALL_TUBES);
+        /* @var $tubeProvider \Everlution\TubeBundle\Tube\TubeInterface */
+        $tubeProvider = $this->selectTube($input, $output, self::ALL_TUBES);
 
         $table = new Table($output);
         $table

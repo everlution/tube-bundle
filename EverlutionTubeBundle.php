@@ -4,7 +4,7 @@ namespace Everlution\TubeBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Everlution\TubeBundle\DependencyInjection\Compiler\TubeProviderChainCompilerPass;
+use Everlution\TubeBundle\DependencyInjection\Compiler\TubeChainCompilerPass;
 
 class EverlutionTubeBundle extends Bundle
 {
@@ -12,6 +12,6 @@ class EverlutionTubeBundle extends Bundle
     {
         parent::build($container);
 
-        $container->addCompilerPass(new TubeProviderChainCompilerPass());
+        $container->addCompilerPass(new TubeChainCompilerPass());
     }
 }
