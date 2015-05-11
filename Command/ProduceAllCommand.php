@@ -28,9 +28,9 @@ class ProduceAllCommand extends ContainerAwareCommand implements SelectTubeInter
     {
         $tubes = array();
         if ($input->getOption('all')) {
-            $tubes = $this->getTubes(self::DISABLED_TUBES);
+            $tubes = $this->getTubes(self::ENABLED_TUBES);
         } else {
-            $tubes[] = $this->selectTube($input, $output, self::DISABLED_TUBES);
+            $tubes[] = $this->selectTube($input, $output, self::ENABLED_TUBES);
         }
 
         foreach ($tubes as $tube) {
