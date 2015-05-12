@@ -13,9 +13,9 @@ class PheanstalkAdapter extends AbstractAdapter
 
     private $pheanstalk;
 
-    public function __construct(JobSerializerInterface $jobSerializer, Pheanstalk $pheanstalk)
+    public function __construct(JobSerializerInterface $jobSerializer, $prefix, Pheanstalk $pheanstalk)
     {
-        parent::__construct($jobSerializer);
+        parent::__construct($jobSerializer, $prefix);
         $this->pheanstalk = $pheanstalk;
     }
 
@@ -23,7 +23,7 @@ class PheanstalkAdapter extends AbstractAdapter
     {
         return $this
             ->pheanstalk
-            ->watch($tubeName)
+            ->watch($this->getFullTubeName($tubeName))
             ->ignore(self::DEFAULT_TUBE)
         ;
     }
@@ -65,7 +65,7 @@ class PheanstalkAdapter extends AbstractAdapter
         $jobId = $this
             ->pheanstalk
             ->putInTube(
-                $tubeName,
+                $this->getFullTubeName($tubeName),
                 $payload,
                 $job->getPriority(),
                 $job->getDelay(),
@@ -78,9 +78,11 @@ class PheanstalkAdapter extends AbstractAdapter
 
     public function reserve($tubeName, $timeout = null)
     {
+        $fullTubeName = $this->getFullTubeName($tubeName);
+
         $pheanstalkJob = $this
-            ->getTube($tubeName)
-            ->reserveFromTube($tubeName, $timeout)
+            ->getTube($fullTubeName)
+            ->reserveFromTube($fullTubeName, $timeout)
         ;
 
         $job = $this
@@ -115,7 +117,7 @@ class PheanstalkAdapter extends AbstractAdapter
     public function release($tubeName, JobInterface $job)
     {
         $this
-            ->getTube($tubeName)
+            ->getTube($this->getFullTubeName($tubeName))
             ->release(
                 $this->getPheanstalkJob($job),
                 $job->getPriority(),
@@ -127,20 +129,16 @@ class PheanstalkAdapter extends AbstractAdapter
     public function bury($tubeName, JobInterface $job)
     {
         $this
-            ->getTube($tubeName)
-            ->bury(
-                $this->getPheanstalkJob($job)
-            )
+            ->getTube($this->getFullTubeName($tubeName))
+            ->bury($this->getPheanstalkJob($job))
         ;
     }
 
     public function delete($tubeName, JobInterface $job)
     {
         $this
-            ->getTube($tubeName)
-            ->delete(
-                $this->getPheanstalkJob($job)
-            )
+            ->getTube($this->getFullTubeName($tubeName))
+            ->delete($this->getPheanstalkJob($job))
         ;
     }
 
@@ -148,101 +146,63 @@ class PheanstalkAdapter extends AbstractAdapter
     {
         $stats = $this
             ->pheanstalk
-            ->statsJob(
-                $this->getPheanstalkJob($job)
-            )
+            ->statsJob($this->getPheanstalkJob($job))
         ;
 
         return isset($stats['releases']) ? $stats['releases'] : 0;
     }
 
-    public function countJobsBuried($tubeName)
+    private function getTubeStats($tubeName, $property)
     {
-        if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
-            return 0;
+        $fullTubeName = $this->getFullTubeName($tubeName);
+
+        if (!in_array($fullTubeName, $this->pheanstalk->listTubes())) {
+            return null;
         }
 
         $stats = $this
             ->pheanstalk
-            ->statsTube($tubeName)
+            ->statsTube($fullTubeName)
         ;
 
-        return isset($stats['current-jobs-buried']) ? $stats['current-jobs-buried'] : 0;
+        return isset($stats[$property]) ? $stats[$property] : null;
+    }
+
+    public function countJobsBuried($tubeName)
+    {
+        return (int) $this->getTubeStats($tubeName, 'current-jobs-buried');
     }
 
     public function countJobsReady($tubeName)
     {
-        if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
-            return 0;
-        }
-
-        $stats = $this
-            ->pheanstalk
-            ->statsTube($tubeName)
-        ;
-
-        return isset($stats['current-jobs-ready']) ? $stats['current-jobs-ready'] : 0;
+        return (int) $this->getTubeStats($tubeName, 'current-jobs-ready');
     }
 
     public function countJobsDelayed($tubeName)
     {
-        if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
-            return 0;
-        }
-
-        $stats = $this
-            ->pheanstalk
-            ->statsTube($tubeName)
-        ;
-
-        return isset($stats['current-jobs-delayed']) ? $stats['current-jobs-delayed'] : 0;
+        return (int) $this->getTubeStats($tubeName, 'current-jobs-delayed');
     }
 
     public function countJobsReserved($tubeName)
     {
-        if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
-            return 0;
-        }
-
-        $stats = $this
-            ->pheanstalk
-            ->statsTube($tubeName)
-        ;
-
-        return isset($stats['current-jobs-reserved']) ? $stats['current-jobs-reserved'] : 0;
+        return (int) $this->getTubeStats($tubeName, 'current-jobs-reserved');
     }
 
     public function countJobsWaiting($tubeName)
     {
-        if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
-            return 0;
-        }
-
-        $stats = $this
-            ->pheanstalk
-            ->statsTube($tubeName)
-        ;
-
-        return isset($stats['current-jobs-waiting']) ? $stats['current-jobs-waiting'] : 0;
+        return (int) $this->getTubeStats($tubeName, 'current-jobs-waiting');
     }
 
     public function countJobsCompleted($tubeName)
     {
-        if (!in_array($tubeName, $this->pheanstalk->listTubes())) {
-            return 0;
-        }
-
-        $stats = $this
-            ->pheanstalk
-            ->statsTube($tubeName)
-        ;
+        $totalJobs = (int) $this->getTubeStats($tubeName, 'total-jobs');
 
         return
-            $stats['total-jobs']
-            - $stats['current-jobs-ready']
-            - $stats['current-jobs-reserved']
-            - $stats['current-jobs-buried']
-            - $stats['current-jobs-delayed']
+            $totalJobs
+            - $this->countJobsReady($tubeName)
+            - $this->countJobsReserved($tubeName)
+            - $this->countJobsBuried($tubeName)
+            - $this->countJobsDelayed($tubeName)
         ;
     }
 

@@ -11,8 +11,16 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     protected $jobSerializer;
 
-    public function __construct(JobSerializerInterface $jobSerializer)
+    protected $prefix;
+
+    public function __construct(JobSerializerInterface $jobSerializer, $prefix = '')
     {
         $this->jobSerializer = $jobSerializer;
+        $this->prefix = $prefix;
+    }
+
+    protected function getFullTubeName($tubeName)
+    {
+        return sprintf('%s%s', $this->prefix, $tubeName);
     }
 }
