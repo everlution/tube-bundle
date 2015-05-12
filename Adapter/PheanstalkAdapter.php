@@ -157,7 +157,7 @@ class PheanstalkAdapter extends AbstractAdapter
         $fullTubeName = $this->getFullTubeName($tubeName);
 
         if (!in_array($fullTubeName, $this->pheanstalk->listTubes())) {
-            return null;
+            return;
         }
 
         $stats = $this

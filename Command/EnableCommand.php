@@ -36,7 +36,7 @@ class EnableCommand extends ContainerAwareCommand implements SelectTubeInterface
         foreach ($tubes as $tube) {
             if (!$tube->isEnabled()) {
                 $tube->enable();
-                $output->writeln(sprintf('<comment>Tube <%s> disabled</comment>', $tube->getTubeName()));
+                $output->writeln(sprintf('<comment>Tube <%s> enabled</comment>', $tube->getTubeName()));
             } else {
                 $output->writeln(sprintf('<comment>Tube <%s> is already enabled</comment>', $tube->getTubeName()));
             }
