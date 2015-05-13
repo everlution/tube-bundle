@@ -18,13 +18,13 @@ abstract class AbstractTube implements TubeInterface
 {
     private $adapter;
 
-    private $tubeName;
+    protected $tubeName;
 
     private $manager;
 
     protected $jobFactory;
 
-    private $eventDispatcher;
+    protected $eventDispatcher;
 
     use JobFeaturesTrait;
 
