@@ -164,7 +164,7 @@ abstract class AbstractTube implements TubeInterface
         } catch (TubeException\InvalidJobException $e) {
             $this
                 ->eventDispatcher
-                ->dispatch(JobEvents::INVALID, new JobEvent($this->tubeName, $job))
+                ->dispatch(JobEvents::INVALID, new JobEvent($this->tubeName, $job, $e->getMessage()))
             ;
             $this
                 ->adapter
@@ -172,7 +172,7 @@ abstract class AbstractTube implements TubeInterface
             ;
             $this
                 ->eventDispatcher
-                ->dispatch(JobEvents::BURIED, new JobEvent($this->tubeName, $job))
+                ->dispatch(JobEvents::BURIED, new JobEvent($this->tubeName, $job, $e->getMessage()))
             ;
         } catch (\Exception $e) {
             $this
@@ -193,7 +193,7 @@ abstract class AbstractTube implements TubeInterface
 
                 $this
                     ->eventDispatcher
-                    ->dispatch(JobEvents::RELEASED, new JobEvent($this->tubeName, $job))
+                    ->dispatch(JobEvents::RELEASED, new JobEvent($this->tubeName, $job, $e->getMessage()))
                 ;
             } else {
                 $this
