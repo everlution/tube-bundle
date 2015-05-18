@@ -27,7 +27,7 @@ class DisableCommand extends ContainerAwareCommand implements SelectTubeInterfac
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $tubes = array();
-        if ($input->hasOption('all')) {
+        if ($input->getOption('all')) {
             $tubes = $this->getTubes(self::ENABLED_TUBES);
         } else {
             $tubes[] = $this->selectTube($input, $output, self::ENABLED_TUBES);

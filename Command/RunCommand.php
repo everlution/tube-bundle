@@ -71,7 +71,7 @@ class RunCommand extends ContainerAwareCommand implements SelectTubeInterface
 
             if ($jobsToConsume !== null) {
                 if ($jobsToConsume > 0) {
-                    $jobsToConsume--;
+                    --$jobsToConsume;
                 } else {
                     break;
                 }
